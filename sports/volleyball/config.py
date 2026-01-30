@@ -5,7 +5,7 @@ from decimal import Decimal, ROUND_CEILING
 from enum import Enum
 from typing import Dict, List, Tuple
 
-from common.core import MeasurementUnit
+from sports.common.core import MeasurementUnit
 
 CENTIMETERS_PER_FOOT = Decimal("30.48")
 

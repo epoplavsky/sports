@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import supervision as sv
 from typing import Tuple, Optional, List
-from volleyball.config import CourtConfiguration
-from common.core import MeasurementUnit
+from sports.volleyball.config import CourtConfiguration
+from sports.common.core import MeasurementUnit
 
 
 def _to_pixel(
