@@ -10,11 +10,15 @@ def _to_pixel(
     point: Tuple[float, float],
     scale: float,
     padding: int,
+    court_width: float,
 ) -> Tuple[int, int]:
-    """Scale court point to pixel space and apply padding."""
+    """Scale court point to pixel space, flip Y-axis, and apply padding.
+
+    Flips Y-axis so that (0,0) appears at bottom-left of rendered court.
+    """
     return (
         int(round(point[0] * scale + padding)),
-        int(round(point[1] * scale + padding)),
+        int(round((court_width - point[1]) * scale + padding)),
     )
 
 
@@ -41,12 +45,12 @@ def draw_court(
     # Attack zone fill beneath lines
     if attack_zone_color is not None:
         left_attack_poly = np.array(
-            [_to_pixel(config.vertices[i], scale, padding)
+            [_to_pixel(config.vertices[i], scale, padding, config.court_width)
              for i in config.left_attack_zone_indexes],
             dtype=np.int32,
         )
         right_attack_poly = np.array(
-            [_to_pixel(config.vertices[i], scale, padding)
+            [_to_pixel(config.vertices[i], scale, padding, config.court_width)
              for i in config.right_attack_zone_indexes],
             dtype=np.int32,
         )
@@ -56,7 +60,7 @@ def draw_court(
     # Court perimeter (sidelines and baselines)
     court_corners = [config.vertices[i] for i in config.court_corner_indexes]
     perimeter_points = np.array(
-        [_to_pixel(corner, scale, padding) for corner in court_corners],
+        [_to_pixel(corner, scale, padding, config.court_width) for corner in court_corners],
         dtype=np.int32,
     )
     cv2.polylines(
@@ -65,18 +69,18 @@ def draw_court(
     )
 
     # Center line (net line)
-    center_start = _to_pixel(config.vertices[4], scale, padding)  # center bottom
-    center_end = _to_pixel(config.vertices[5], scale, padding)  # center top
+    center_start = _to_pixel(config.vertices[4], scale, padding, config.court_width)  # center bottom
+    center_end = _to_pixel(config.vertices[5], scale, padding, config.court_width)  # center top
     cv2.line(image, center_start, center_end, line_color.as_bgr(), line_thickness)
 
     # Left attack line
-    left_attack_start = _to_pixel(config.vertices[6], scale, padding)
-    left_attack_end = _to_pixel(config.vertices[7], scale, padding)
+    left_attack_start = _to_pixel(config.vertices[6], scale, padding, config.court_width)
+    left_attack_end = _to_pixel(config.vertices[7], scale, padding, config.court_width)
     cv2.line(image, left_attack_start, left_attack_end, line_color.as_bgr(), line_thickness)
 
     # Right attack line
-    right_attack_start = _to_pixel(config.vertices[8], scale, padding)
-    right_attack_end = _to_pixel(config.vertices[9], scale, padding)
+    right_attack_start = _to_pixel(config.vertices[8], scale, padding, config.court_width)
+    right_attack_end = _to_pixel(config.vertices[9], scale, padding, config.court_width)
     cv2.line(image, right_attack_start, right_attack_end, line_color.as_bgr(), line_thickness)
 
     # Net representation (thicker line at center with posts)
@@ -91,14 +95,14 @@ def draw_court(
     # Service area indicators (optional dashed lines)
     if hasattr(config, '_service_area_depth_in_centimeters') and config._service_area_depth_in_centimeters > 0:
         # Left service area
-        left_service_start = _to_pixel(config.vertices[10], scale, padding)
-        left_service_end = _to_pixel(config.vertices[11], scale, padding)
+        left_service_start = _to_pixel(config.vertices[10], scale, padding, config.court_width)
+        left_service_end = _to_pixel(config.vertices[11], scale, padding, config.court_width)
         _draw_dashed_line(image, left_service_start, left_service_end,
                          line_color.as_bgr(), line_thickness)
 
         # Right service area
-        right_service_start = _to_pixel(config.vertices[12], scale, padding)
-        right_service_end = _to_pixel(config.vertices[13], scale, padding)
+        right_service_start = _to_pixel(config.vertices[12], scale, padding, config.court_width)
+        right_service_end = _to_pixel(config.vertices[13], scale, padding, config.court_width)
         _draw_dashed_line(image, right_service_start, right_service_end,
                          line_color.as_bgr(), line_thickness)
 
@@ -182,7 +186,7 @@ def draw_made_and_miss_on_court(
     )
 
     def point_to_pixel(point: Tuple[float, float]) -> Tuple[int, int]:
-        return _to_pixel(point, scale=scale, padding=padding)
+        return _to_pixel(point, scale=scale, padding=padding, court_width=config.court_width)
 
     # Normalize inputs to iterable collections
     made_iter = (
@@ -256,7 +260,7 @@ def draw_points_on_court(
     font_thickness = max(1, size // 8)
 
     for i in range(n):
-        cx, cy = _to_pixel(tuple(pts[i]), scale=scale, padding=padding)
+        cx, cy = _to_pixel(tuple(pts[i]), scale=scale, padding=padding, court_width=config.court_width)
 
         # Face (fill)
         if fill_color is not None:
@@ -352,7 +356,7 @@ def draw_paths_on_court(
         for seg in to_segments(path):
             if seg.shape[0] >= 2:
                 poly = np.array(
-                    [[_to_pixel((float(x), float(y)), scale, padding) for x, y in seg]],
+                    [[_to_pixel((float(x), float(y)), scale, padding, config.court_width) for x, y in seg]],
                     dtype=np.int32,
                 )
                 cv2.polylines(
@@ -364,7 +368,7 @@ def draw_paths_on_court(
                     lineType=cv2.LINE_AA,
                 )
             elif seg.shape[0] == 1:
-                cx, cy = _to_pixel((float(seg[0, 0]), float(seg[0, 1])), scale, padding)
+                cx, cy = _to_pixel((float(seg[0, 0]), float(seg[0, 1])), scale, padding, config.court_width)
                 cv2.circle(
                     img=court,
                     center=(cx, cy),

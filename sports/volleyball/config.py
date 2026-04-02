@@ -243,35 +243,35 @@ class CourtConfiguration:
         service_depth = self._service_area_depth_in_centimeters
 
         return [
-            # Court corners - bottom-left is now (0,0), others relative to it
-            (0, 0),  # 0: bottom-left corner
-            (0, court_width),  # 1: top-left corner
-            (court_length, 0),  # 2: bottom-right corner
-            (court_length, court_width),  # 3: top-right corner
+            # Court corners - bottom-left in RENDERED image is now (0,0)
+            (0, court_width),  # 0: bottom-left corner (in rendered image)
+            (0, 0),  # 1: top-left corner (in rendered image)
+            (court_length, court_width),  # 2: bottom-right corner (in rendered image)
+            (court_length, 0),  # 3: top-right corner (in rendered image)
 
             # Center line points
-            (half_length, 0),  # 4: center bottom
-            (half_length, court_width),  # 5: center top
+            (half_length, court_width),  # 4: center bottom (in rendered image)
+            (half_length, 0),  # 5: center top (in rendered image)
 
             # Left attack line
-            (half_length - attack_distance, 0),  # 6: left attack line bottom
-            (half_length - attack_distance, court_width),  # 7: left attack line top
+            (half_length - attack_distance, court_width),  # 6: left attack line bottom (in rendered image)
+            (half_length - attack_distance, 0),  # 7: left attack line top (in rendered image)
 
             # Right attack line
-            (half_length + attack_distance, 0),  # 8: right attack line bottom
-            (half_length + attack_distance, court_width),  # 9: right attack line top
+            (half_length + attack_distance, court_width),  # 8: right attack line bottom (in rendered image)
+            (half_length + attack_distance, 0),  # 9: right attack line top (in rendered image)
 
             # Service area corners (left side)
-            (-service_depth, 0),  # 10: left service area bottom-left
-            (-service_depth, court_width),  # 11: left service area top-left
+            (-service_depth, court_width),  # 10: left service area bottom-left (in rendered image)
+            (-service_depth, 0),  # 11: left service area top-left (in rendered image)
 
             # Service area corners (right side)
-            (court_length + service_depth, 0),  # 12: right service area bottom-right
-            (court_length + service_depth, court_width),  # 13: right service area top-right
+            (court_length + service_depth, court_width),  # 12: right service area bottom-right (in rendered image)
+            (court_length + service_depth, 0),  # 13: right service area top-right (in rendered image)
 
             # Net position (conceptual points for drawing)
-            (half_length, court_width // 4),  # 14: net bottom quarter
-            (half_length, (3 * court_width) // 4),  # 15: net top quarter
+            (half_length, (3 * court_width) // 4),  # 14: net bottom quarter (in rendered image)
+            (half_length, court_width // 4),  # 15: net top quarter (in rendered image)
         ]
 
     def _vertices_in_unit(self) -> List[Tuple[float, float]]:
