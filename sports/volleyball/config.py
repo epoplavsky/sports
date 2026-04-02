@@ -243,7 +243,7 @@ class CourtConfiguration:
         service_depth = self._service_area_depth_in_centimeters
 
         return [
-            # Court corners
+            # Court corners - bottom-left is now (0,0), others relative to it
             (0, 0),  # 0: bottom-left corner
             (0, court_width),  # 1: top-left corner
             (court_length, 0),  # 2: bottom-right corner
